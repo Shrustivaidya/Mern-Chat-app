@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Input, Button, Form, Checkbox, Upload, message } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone ,UploadOutlined} from '@ant-design/icons';
+import { notification } from "antd";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";// Import useNavigate from react-router-dom
 
 const SignupForm = () => {
   const [name, setName] = useState('');
@@ -9,15 +12,146 @@ const SignupForm = () => {
   const [confirmpassword, setConfirmpassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [picLoading, setPicLoading] = useState(false);
+  const [pic, setPic] = useState();
+
+  const navigate = useNavigate(); // Use useNavigate instead of history
 
   const handleClick = () => setShowPassword(!showPassword);
 
-  const postDetails = (file) => {
-    // Logic to handle picture upload
+ 
+
+  const submitHandler = async () => {
+   
+
+  setPicLoading(true);
+
+  if (!name || !email || !password || !confirmpassword) {
+    notification.warning({
+      message: "Warning",
+      description: "Please fill all the fields.",
+      placement: "bottom",
+    });
+    setPicLoading(false);
+    return;
+  }
+
+  if (password !== confirmpassword) {
+    notification.warning({
+      message: "Warning",
+      description: "Passwords do not match.",
+      placement: "bottom",
+    });
+    setPicLoading(false);
+    return;
+  }
+
+  console.log(name, email, password, pic);
+
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    const { data } = await axios.post(
+      "/api/user",
+      {
+        name,
+        email,
+        password,
+        pic,
+      },
+      config
+    );
+
+    console.log(data);
+
+    notification.success({
+      message: "Success",
+      description: "Registration Successful",
+      placement: "bottom",
+    });
+
+    localStorage.setItem("userInfo", JSON.stringify(data));
+    setPicLoading(false);
+    navigate("/chats"); // Use navigate to go to the chats page
+  } catch (error) {
+    notification.error({
+      message: "Error",
+      description: error.response?.data?.message || "An error occurred!",
+      placement: "bottom",
+    });
+    setPicLoading(false);
+  }
+    
+    
   };
 
-  const submitHandler = () => {
-    // Handle form submission
+
+  const postDetails = (pics) => {
+    setPicLoading(true);
+  
+    // Handle undefined image
+    if (!pics) {
+      notification.warning({
+        message: "Warning",
+        description: "Please Select an Image!",
+        placement: "bottom",
+        duration: 5,
+      });
+      setPicLoading(false);
+      return;
+    }
+  
+    console.log(pics);
+  
+    // Validate image type
+    if (pics.type === "image/jpeg" || pics.type === "image/png") {
+      const data = new FormData();
+      data.append("file", pics);
+      data.append("upload_preset", "chat-app");
+      data.append("cloud_name", "roadsider");
+  
+      // Use Cloudinary URL with authentication via API key and secret
+      const cloudinaryUrl =
+        "https://api.cloudinary.com/v1_1/roadsider/image/upload";
+  
+      axios
+        .post(cloudinaryUrl, data)
+        .then((response) => {
+          const imageUrl = response.data.secure_url; // Use secure URL
+          setPic(imageUrl);
+          console.log(imageUrl);
+          setPicLoading(false);
+  
+          notification.success({
+            message: "Success",
+            description: "Image uploaded successfully!",
+            placement: "bottom",
+            duration: 5,
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+          setPicLoading(false);
+  
+          notification.error({
+            message: "Error",
+            description: "Failed to upload image. Please try again later.",
+            placement: "bottom",
+            duration: 5,
+          });
+        });
+    } else {
+      notification.warning({
+        message: "Warning",
+        description: "Please Select a valid Image (JPEG/PNG)!",
+        placement: "bottom",
+        duration: 5,
+      });
+      setPicLoading(false);
+    }
   };
 
   return (
@@ -106,14 +240,15 @@ const SignupForm = () => {
       </Form.Item>
 
       <Form.Item>
-        <Button
-          type="primary"
-          htmlType="submit"
-          style={{ width: '100%' }}
-          loading={picLoading}
-        >
-          Sign Up
-        </Button>
+      <Button
+        type="primary"
+        block
+        loading={picLoading}
+        style={{ marginTop: 15 }}
+        onClick={submitHandler}
+      >
+        Sign Up
+      </Button>
       </Form.Item>
     </Form>
   );

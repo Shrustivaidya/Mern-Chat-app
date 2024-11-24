@@ -1,19 +1,67 @@
 import React, { useState } from 'react';
 import { Input, Button, Form, Checkbox, message } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import { notification } from "antd";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null); // Ensure this is defined
+  const navigate = useNavigate(); // Initialize navigate
 
   const handleClick = () => setShow(!show);
 
-  const submitHandler = () => {
-    // Handle login submission logic
-    console.log('Email:', email);
-    console.log('Password:', password);
+  const submitHandler = async () => {
+    setLoading(true);
+    if (!email || !password) {
+      notification.warning({
+        message: "Warning",
+        description: "Please fill all the fields.",
+        placement: "bottom",
+        duration: 5,
+      });
+      setLoading(false);
+      return;
+    }
+  
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+  
+      const { data } = await axios.post(
+        "/api/user/login",
+        { email, password },
+        config
+      );
+  
+      notification.success({
+        message: "Login Successful",
+        description: "You have successfully logged in.",
+        placement: "bottom",
+        duration: 5,
+      });
+  
+      setUser(data);
+      localStorage.setItem("userInfo", JSON.stringify(data));
+      setLoading(false);
+  
+      navigate("/chats"); // Redirect to the chats page
+    } catch (error) {
+      notification.error({
+        message: "Error Occurred",
+        description: error.response?.data?.message || "An unexpected error occurred.",
+        placement: "bottom",
+        duration: 5,
+      });
+      setLoading(false);
+    }
   };
 
   return (
