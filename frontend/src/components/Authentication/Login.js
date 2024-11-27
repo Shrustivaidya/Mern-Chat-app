@@ -52,7 +52,7 @@ const LoginForm = () => {
       localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
   
-      navigate("/chats"); // Redirect to the chats page
+      navigate("/chat"); // Redirect to the chats page
     } catch (error) {
       notification.error({
         message: "Error Occurred",

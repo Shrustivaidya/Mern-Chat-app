@@ -1,13 +1,22 @@
-import React from 'react';
+import React, {  useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layout, Tabs, Typography, Card } from "antd";
 import Login from "../components/Authentication/Login";
 import Signup from "../components/Authentication/Signup";
+
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
 const { Content } = Layout;
 
 function Homepage() {
+  const navigate = useNavigate(); // Initialize navigate
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("userInfo"));
+
+    if (user) navigate("/chat");
+  }, [navigate]);
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Content
