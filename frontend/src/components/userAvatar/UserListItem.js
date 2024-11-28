@@ -4,8 +4,8 @@ import { ChatState } from "../../Context/ChatProvider";
 
 const { Text } = Typography;
 
-const UserListItem = ({ handleFunction }) => {
-  const { user } = ChatState();
+const UserListItem = ({ user,handleFunction }) => {
+ 
 
   return (
     <Card
