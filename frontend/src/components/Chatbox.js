@@ -1,12 +1,12 @@
 import React from "react";
 import { Card } from "antd";
-//import SingleChat from "./SingleChat"; // Adjust the import path as necessary
+import SingleChat from "./SingleChat"; // Adjust the import path as necessary
 
 const ChatBox = ({ fetchAgain, setFetchAgain, selectedChat }) => {
   return (
     <Card
       style={{
-        display: selectedChat ? "flex" : "none", // Responsive handling for 'base' case
+        
         flexDirection: "column",
         alignItems: "center",
         padding: "16px", // 3 in Chakra is approximately 16px
@@ -17,7 +17,7 @@ const ChatBox = ({ fetchAgain, setFetchAgain, selectedChat }) => {
         ...(window.innerWidth >= 768 && { width: "68%" }), // Responsive handling for 'md'
       }}
     >
-      {/* <SingleChat fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} /> */}
+      <SingleChat fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />
     </Card>
   );
 };
